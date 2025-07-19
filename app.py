@@ -79,7 +79,7 @@ async def start(update: Update, context: CallbackContext):
                     [InlineKeyboardButton("Verify", callback_data="verify")]]
         await update.message.reply_text(  # Fixed parenthesis here
             "Please join our channel to use this bot!",
-            reply_markup=InlineKeyboardMarkup(keyboard)
+            reply_markup=InlineKeyboardMarkup(keyboard))
     
     session.close()
 
