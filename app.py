@@ -77,9 +77,10 @@ async def start(update: Update, context: CallbackContext):
     else:
         keyboard = [[InlineKeyboardButton("Join Channel", url=f"https://t.me/{CHANNEL_ID}")],
                     [InlineKeyboardButton("Verify", callback_data="verify")]]
-        await update.message.reply_text(
+        await update.message.reply_text(  # Fixed parenthesis here
             "Please join our channel to use this bot!",
             reply_markup=InlineKeyboardMarkup(keyboard)
+    
     session.close()
 
 async def verify(update: Update, context: CallbackContext):
@@ -96,6 +97,7 @@ async def verify(update: Update, context: CallbackContext):
         await show_main_menu(query)
     else:
         await query.edit_message_text("You haven't joined the channel yet!")
+    
     session.close()
 
 async def show_main_menu(update: Update):
@@ -105,7 +107,11 @@ async def show_main_menu(update: Update):
         [InlineKeyboardButton("Delete Email", callback_data="delete_email")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text("Main Menu:", reply_markup=reply_markup)
+    
+    if update.message:
+        await update.message.reply_text("Main Menu:", reply_markup=reply_markup)
+    else:
+        await update.edit_message_text("Main Menu:", reply_markup=reply_markup)
 
 async def new_email(update: Update, context: CallbackContext):
     query = update.callback_query
@@ -133,6 +139,16 @@ async def new_email(update: Update, context: CallbackContext):
         await query.edit_message_text(f"Your new email: `{address}`", parse_mode='Markdown')
     else:
         await query.edit_message_text("Failed to create email. Please try again.")
+
+async def check_inbox(update: Update, context: CallbackContext):
+    # Implement inbox checking logic here
+    await update.callback_query.answer()
+    await update.callback_query.edit_message_text("Inbox feature coming soon!")
+
+async def delete_email(update: Update, context: CallbackContext):
+    # Implement email deletion logic here
+    await update.callback_query.answer()
+    await update.callback_query.edit_message_text("Delete feature coming soon!")
 
 async def notify_all(update: Update, context: CallbackContext):
     if str(update.effective_user.id) != ADMIN_ID:
@@ -165,16 +181,19 @@ def main():
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(verify, pattern="^verify$"))
     application.add_handler(CallbackQueryHandler(new_email, pattern="^new_email$"))
+    application.add_handler(CallbackQueryHandler(check_inbox, pattern="^check_inbox$"))
+    application.add_handler(CallbackQueryHandler(delete_email, pattern="^delete_email$"))
     application.add_handler(CommandHandler("notifyall", notify_all))
     
     # Start the bot
     if os.environ.get('RENDER'):
         PORT = int(os.environ.get('PORT', 10000))
-        WEBHOOK_URL = "https://your-app-name.onrender.com/"  # Update with your URL
+        WEBHOOK_URL = "https://your-app-name.onrender.com/"  # Update with your actual URL
         application.run_webhook(
             listen="0.0.0.0",
             port=PORT,
-            webhook_url=WEBHOOK_URL
+            webhook_url=WEBHOOK_URL,
+            secret_token='RENDER_WEBHOOK_SECRET'
         )
     else:
         application.run_polling()
