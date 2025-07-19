@@ -1,0 +1,5 @@
+python-telegram-bot[job-queue]==20.3
+sqlalchemy
+requests
+psycopg2-binary
+python-dotenv
